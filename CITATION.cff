@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it."
+title: "Auracelle Lyra v3 — E-AGPO-HT Integration (HTML Prototype)"
+authors:
+  - family-names: "Evans"
+    given-names: "Grace-Alice"
+date-released: "2026-03-02"
+type: software
+license: MIT
+repository-code: "https://github.com/<your-org-or-user>/auracelle-lyra-v3-integration"
+abstract: >
+  Auracelle Lyra v3 is an assurance governance simulation platform. This artifact demonstrates the integration
+  architecture mapping notebook components (registry scoring, game state vector, governance network, compliance
+  convergence) into the v3 multi-page design (E-AGPO, E-AGSO, E-AGPO-HT Sandbox).
