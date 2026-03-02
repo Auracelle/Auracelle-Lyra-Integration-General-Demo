@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auracelle Lyra · E-AGPO-HT Sandbox · Integration</title>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+:root{
+  --bg:#f7f6f2;--bg-warm:#f0ede6;--bg-card:#fff;--bg-panel:#fafaf8;
+  --ink:#1a1a2e;--ink-2:#2d3a5c;--ink-light:#5a6a85;--ink-muted:#9aabbf;
+  --blue:#009edb;--blue-dark:#005f8e;--blue-light:#e8f6fc;
+  --teal:#007a7a;--teal-light:#e0f2f2;
+  --amber:#d97706;--amber-light:#fef3c7;
+  --green:#166534;--green-light:#dcfce7;
+  --red:#991b1b;--red-light:#fee2e2;
+  --purple:#5b21b6;--purple-light:#ede9fe;--purple-mid:#7c3aed;
+  --gold:#b8860b;--gold-light:#fdf3d8;
+  --border:#dde3ec;--border-s:#b8c4d6;
+  --sh:0 1px 3px rgba(26,26,46,.08),0 1px 2px rgba(26,26,46,.06);
+  --shm:0 4px 12px rgba(26,26,46,.10),0 2px 4px rgba(26,26,46,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;font-size:14px;line-height:1.6;min-height:100vh;}
+
+/* ── NAV ── */
+.nav{background:var(--ink-2);position:sticky;top:0;z-index:200;box-shadow:var(--shm);}
+.nav-inner{max-width:1440px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:60px;gap:16px;}
+.brand{display:flex;align-items:center;gap:12px;}
+.brand-icon{width:32px;height:32px;border:2px solid rgba(255,255,255,.3);display:flex;align-items:center;justify-content:center;font-family:'Libre Baskerville',serif;font-size:13px;font-weight:700;color:#fff;flex-shrink:0;}
+.brand-name{font-family:'Libre Baskerville',serif;font-size:15px;font-weight:700;color:#fff;}
+.brand-name small{display:block;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:400;color:rgba(255,255,255,.45);letter-spacing:1px;text-transform:uppercase;}
+.nav-pages{display:flex;gap:0;}
+.npg{padding:8px 16px;font-size:11px;font-weight:500;letter-spacing:.5px;color:rgba(255,255,255,.4);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;}
+.npg:hover{color:rgba(255,255,255,.75);}
+.npg.p1c{color:rgba(255,255,255,.5);border-bottom-color:var(--blue);}
+.npg.p2c{color:rgba(255,255,255,.5);border-bottom-color:var(--teal);}
+.npg.p3c{color:#fff;border-bottom-color:#a78bfa;}
+.nav-badge{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.3);letter-spacing:1px;border:1px solid rgba(255,255,255,.12);padding:3px 8px;flex-shrink:0;}
+
+.wrap{max-width:1440px;margin:0 auto;padding:24px;}
+
+/* ── INTEGRATION BANNER ── */
+.int-banner{background:var(--ink-2);color:#fff;padding:28px 32px;margin-bottom:28px;position:relative;overflow:hidden;}
+.int-banner::before{content:'';position:absolute;right:-30px;top:-30px;width:180px;height:180px;border:1px solid rgba(167,139,250,.12);border-radius:50%;}
+.int-banner::after{content:'';position:absolute;right:30px;top:30px;width:100px;height:100px;border:1px solid rgba(167,139,250,.08);border-radius:50%;}
+.int-tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:#a78bfa;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);padding:4px 12px;display:inline-block;margin-bottom:10px;}
+.int-title{font-family:'Libre Baskerville',serif;font-size:22px;font-weight:700;margin-bottom:6px;}
+.int-desc{font-size:13px;color:rgba(255,255,255,.58);max-width:660px;line-height:1.7;}
+
+/* ── ARCHITECTURE FLOW ── */
+.arch-flow{display:grid;grid-template-columns:1fr 44px 1fr 44px 1fr;align-items:stretch;background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--sh);padding:20px;margin-bottom:24px;gap:0;}
+.af-node{padding:16px;border:1px solid var(--border);}
+.af-p1{border-color:rgba(0,158,219,.3);background:var(--blue-light);}
+.af-p2{border-color:rgba(0,122,122,.3);background:var(--teal-light);}
+.af-p3{border-color:rgba(167,139,250,.3);background:var(--purple-light);}
+.af-ptag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;margin-bottom:6px;}
+.af-ptitle{font-family:'Libre Baskerville',serif;font-size:13px;font-weight:700;margin-bottom:8px;}
+.af-items{font-size:10px;color:var(--ink-light);line-height:2.1;}
+.af-new{color:var(--gold);font-weight:600;}
+.af-arr{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;}
+.af-arr-sym{font-size:22px;color:var(--ink-muted);}
+.af-arr-lbl{font-family:'DM Mono',monospace;font-size:8px;color:var(--ink-muted);letter-spacing:1px;text-align:center;}
+
+/* ── COMPONENT MAP TABLE ── */
+.cmap{background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--sh);margin-bottom:24px;}
+.cmap-hd{background:var(--ink-2);color:#fff;padding:14px 20px;display:flex;align-items:center;justify-content:space-between;}
+.cmap-hd-title{font-family:'Libre Baskerville',serif;font-size:14px;font-weight:700;}
+.cmap-hd-sub{font-family:'DM Mono',monospace;font-size:9px;color:rgba(255,255,255,.45);letter-spacing:1px;}
+.cmap-row{display:grid;grid-template-columns:200px 1fr 150px 100px;border-bottom:1px solid var(--border);}
+.cmap-row:last-child{border-bottom:none;}
+.cmap-head .cmap-cell{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--ink-muted);text-transform:uppercase;background:var(--bg-warm);}
+.cmap-cell{padding:11px 14px;font-size:12px;border-right:1px solid var(--border);}
+.cmap-cell:last-child{border-right:none;}
+.cmap-comp{font-weight:600;color:var(--ink);}
+.cmap-desc{color:var(--ink-light);line-height:1.55;}
+.cmap-dest{font-family:'DM Mono',monospace;font-size:10px;line-height:1.8;}
+.d-p1{color:var(--blue-dark);}
+.d-p2{color:var(--teal);}
+.d-p3{color:var(--purple-mid);}
+.cmap-status{display:flex;align-items:center;justify-content:center;}
+.st-new{font-family:'DM Mono',monospace;font-size:9px;padding:3px 8px;background:var(--purple-light);color:var(--purple-mid);border:1px solid rgba(124,58,237,.2);}
+.st-enr{font-family:'DM Mono',monospace;font-size:9px;padding:3px 8px;background:var(--gold-light);color:var(--gold);border:1px solid rgba(184,134,11,.2);}
+.st-has{font-family:'DM Mono',monospace;font-size:9px;padding:3px 8px;background:var(--green-light);color:var(--green);border:1px solid rgba(22,101,52,.2);}
+
+/* ── PAGE 3 HEADER ── */
+.p3-hd{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 60%,#4c1d95 100%);color:#fff;padding:22px 28px;margin-bottom:24px;border-left:4px solid #a78bfa;position:relative;overflow:hidden;}
+.p3-hd::after{content:'';position:absolute;right:24px;top:50%;transform:translateY(-50%);width:80px;height:80px;border:1px solid rgba(167,139,250,.15);border-radius:50%;}
+.p3-eng{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;color:#a78bfa;background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);padding:4px 12px;display:inline-block;margin-bottom:10px;}
+.p3-title{font-family:'Libre Baskerville',serif;font-size:21px;font-weight:700;margin-bottom:6px;}
+.p3-desc{font-size:13px;color:rgba(255,255,255,.6);max-width:680px;line-height:1.65;}
+
+/* ── DOMAIN BAR ── */
+.dom-bar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:22px;}
+.dbn{padding:9px 18px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--bg-card);color:var(--ink-light);transition:all .2s;display:flex;align-items:center;gap:7px;}
+.dbn:hover{border-color:var(--purple-mid);color:var(--purple-mid);}
+.dbn.active{border-color:var(--purple-mid);background:var(--purple-light);color:var(--purple-mid);}
+
+/* ── g-GWC STRIP ── */
+.gwc-strip{display:grid;grid-template-columns:160px 1fr 180px;gap:20px;align-items:center;background:var(--bg-card);border:1px solid var(--border);border-left:4px solid var(--purple-mid);padding:16px 22px;margin-bottom:22px;box-shadow:var(--sh);}
+.gwc-val{font-family:'DM Mono',monospace;font-size:42px;font-weight:500;line-height:1;}
+.gwc-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--ink-muted);margin-bottom:4px;}
+.gwc-sub{font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-top:4px;}
+.bar-hd{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-bottom:5px;}
+.bar-tr{height:8px;background:var(--bg-warm);border:1px solid var(--border);position:relative;overflow:hidden;}
+.bar-fi{height:100%;transition:width .5s,background .4s;}
+.bar-th{position:absolute;top:0;bottom:0;width:1.5px;background:var(--amber);}
+.bar-th::before{content:attr(data-l);position:absolute;top:-16px;left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:7px;color:var(--amber);white-space:nowrap;}
+.chip{display:inline-block;padding:5px 14px;font-family:'DM Mono',monospace;font-size:10px;border:1px solid;letter-spacing:1px;}
+.chip-g{color:var(--green);border-color:var(--green);background:var(--green-light);}
+.chip-w{color:var(--amber);border-color:var(--amber);background:var(--amber-light);}
+.chip-r{color:var(--red);border-color:var(--red);background:var(--red-light);}
+
+/* ── TABS ── */
+.p3-tabs{display:flex;gap:0;border-bottom:1.5px solid var(--border);margin-bottom:22px;}
+.p3t{padding:8px 16px;font-size:12px;font-weight:500;color:var(--ink-muted);cursor:pointer;border:none;background:transparent;border-bottom:2px solid transparent;position:relative;bottom:-1.5px;transition:all .15s;white-space:nowrap;}
+.p3t:hover{color:var(--ink);}
+.p3t.on{color:var(--purple-mid);border-bottom-color:var(--purple-mid);font-weight:600;}
+.p3pnl{display:none;animation:fin .2s ease;}
+.p3pnl.on{display:block;}
+@keyframes fin{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* ── CARDS ── */
+.card{background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--sh);padding:18px;}
+.card-t{font-family:'Libre Baskerville',serif;font-size:13px;font-weight:700;margin-bottom:4px;}
+.card-s{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--ink-muted);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+.gcol{display:flex;flex-direction:column;gap:14px;}
+.mb16{margin-bottom:16px;}
+.mb22{margin-bottom:22px;}
+
+/* ── GAME STATE ── */
+.cfg-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin-bottom:20px;}
+.cfg-card{background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--sh);padding:14px;}
+.cfg-lbl{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--ink-muted);margin-bottom:7px;}
+.cfg-sel{width:100%;padding:9px 10px;border:1.5px solid var(--border);background:var(--bg-card);font-family:'DM Sans',sans-serif;font-size:12px;color:var(--ink);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%239aabbf' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;transition:border-color .2s;}
+.cfg-sel:focus{outline:none;border-color:var(--purple-mid);}
+.cfg-inf{margin-top:7px;font-size:11px;color:var(--ink-light);font-family:'DM Mono',monospace;padding:5px 8px;background:var(--bg-warm);border-left:2px solid var(--purple-mid);}
+
+.st-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:20px;}
+.stc{background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--sh);padding:13px;}
+.stc-lbl{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--ink-muted);margin-bottom:6px;}
+.stc-title{font-family:'Libre Baskerville',serif;font-size:11px;font-weight:700;color:var(--ink);margin-bottom:8px;font-style:italic;}
+.stc-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;border-bottom:1px solid var(--bg-warm);}
+.stc-row:last-child{border-bottom:none;}
+.stc-nm{font-size:10px;color:var(--ink-light);}
+.stc-vl{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;}
+.mono-box{background:var(--bg-warm);border:1px solid var(--border);padding:12px;font-family:'DM Mono',monospace;font-size:10px;line-height:2.1;color:var(--ink-light);white-space:pre-wrap;}
+
+/* ── REGISTRY ── */
+.ind-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+.ind-row{display:flex;align-items:center;gap:8px;padding:3px 0;}
+.ind-nm{font-size:10px;color:var(--ink-light);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.ind-sl{-webkit-appearance:none;width:70px;height:3px;background:transparent;cursor:pointer;flex-shrink:0;}
+.ind-sl::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;background:var(--purple-mid);border-radius:50%;border:2px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.2);cursor:pointer;}
+.ind-sl::-webkit-slider-runnable-track{height:3px;background:linear-gradient(90deg,var(--purple-mid) var(--pct,50%),var(--border) var(--pct,50%));border-radius:2px;}
+.ind-vl{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;min-width:28px;text-align:right;}
+.ind-sec-hd{grid-column:1/-1;font-family:'DM Mono',monospace;font-size:9px;color:var(--purple-mid);letter-spacing:1px;padding:5px 0 2px;border-top:1px solid var(--border);margin-top:4px;}
+
+.score-chain{display:grid;grid-template-columns:1fr 20px 1fr 20px 100px;gap:0;align-items:start;}
+.scl{background:var(--bg-panel);border:1px solid var(--border);padding:12px;}
+.scl-t{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--ink-muted);margin-bottom:8px;text-transform:uppercase;}
+.sc-arr{display:flex;align-items:center;justify-content:center;padding-top:26px;color:var(--ink-muted);font-size:16px;}
+
+.nof-it{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--bg-warm);}
+.nof-it:last-child{border-bottom:none;}
+.nof-id{font-family:'DM Mono',monospace;font-size:8px;color:var(--purple-mid);min-width:58px;}
+.nof-nm{font-size:9px;color:var(--ink-muted);margin-bottom:2px;}
+.nof-br{flex:1;height:4px;background:var(--bg-warm);overflow:hidden;}
+.nof-bf{height:100%;transition:width .4s,background .3s;}
+.nof-vl{font-family:'DM Mono',monospace;font-size:9px;font-weight:500;min-width:30px;text-align:right;}
+.nof-ps{font-size:9px;min-width:14px;text-align:center;}
+
+.bac-it{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--bg-warm);}
+.bac-it:last-child{border-bottom:none;}
+.bac-id{font-family:'DM Mono',monospace;font-size:8px;color:var(--teal);min-width:44px;}
+.bac-nm{font-size:8px;color:var(--ink-muted);}
+.bac-br{flex:1;height:5px;background:var(--bg-warm);overflow:hidden;}
+.bac-bf{height:100%;transition:width .4s,background .3s;}
+.bac-vl{font-family:'DM Mono',monospace;font-size:10px;font-weight:500;min-width:30px;text-align:right;}
+
+.gg-wrap{text-align:center;padding:16px 8px;}
+.gg-lbl{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:1.5px;color:var(--ink-muted);margin-bottom:5px;}
+.gg-val{font-family:'DM Mono',monospace;font-size:38px;font-weight:500;line-height:1;margin-bottom:6px;}
+.gg-theta{font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);margin-bottom:8px;}
+.gg-bt{height:6px;background:var(--bg-warm);border:1px solid var(--border);position:relative;overflow:hidden;margin:8px 0;}
+.gg-bf{height:100%;transition:width .5s,background .4s;}
+.gg-th{position:absolute;top:0;bottom:0;width:1.5px;background:var(--amber);}
+.gg-th::before{content:attr(data-l);position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:7px;color:var(--amber);white-space:nowrap;}
+
+/* ── BGC GRID ── */
+.bgc-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-bottom:20px;}
+.bgcc{background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--sh);padding:11px;text-align:center;}
+.bgc-code{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;color:var(--teal);margin-bottom:3px;}
+.bgc-name{font-size:9px;color:var(--ink-light);margin-bottom:7px;line-height:1.35;}
+.bgc-score{font-family:'DM Mono',monospace;font-size:17px;font-weight:500;margin-bottom:5px;}
+.bgc-bh{height:3px;background:var(--bg-warm);overflow:hidden;margin-bottom:5px;}
+.bgc-bf{height:100%;transition:width .4s,background .3s;}
+.bgc-sl{-webkit-appearance:none;width:100%;height:3px;background:transparent;cursor:pointer;display:block;}
+.bgc-sl::-webkit-slider-thumb{-webkit-appearance:none;width:11px;height:11px;background:var(--teal);border-radius:50%;border:2px solid #fff;box-shadow:0 1px 2px rgba(0,0,0,.2);}
+.bgc-sl::-webkit-slider-runnable-track{height:3px;background:linear-gradient(90deg,var(--teal) var(--pct,50%),var(--border) var(--pct,50%));border-radius:2px;}
+
+/* ── GNN ── */
+.gnn-wrap{background:#000;height:500px;position:relative;}
+#gnn-cvs{width:100%;height:100%;}
+.gnn-leg{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:18px;flex-wrap:wrap;}
+.gnn-li{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--ink-light);}
+.gnn-dot{width:10px;height:10px;border-radius:50%;}
+
+/* ── CONVERGENCE ── */
+.conv-wrap{background:#070b1a;height:460px;position:relative;}
+#conv-cvs{width:100%;height:100%;}
+.conv-ctrl{padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+.cbtn{padding:7px 16px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;border:1.5px solid;background:transparent;transition:all .2s;}
+.cbtn-p{border-color:var(--purple-mid);color:var(--purple-mid);}
+.cbtn-p:hover{background:var(--purple-mid);color:#fff;}
+.cbtn-s{border-color:var(--border-s);color:var(--ink-muted);}
+.cbtn-s:hover{border-color:var(--ink-light);color:var(--ink);}
+.cstat{font-family:'DM Mono',monospace;font-size:10px;color:var(--ink-muted);padding:5px 10px;background:var(--bg-warm);border:1px solid var(--border);}
+.cstat span{color:var(--ink);font-weight:600;}
+
+/* ── PATHWAYS ── */
+.pw-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px;}
+.pwc{background:var(--bg-card);border:1px solid var(--border);border-left:3px solid var(--amber);box-shadow:var(--sh);padding:14px;}
+.pw-dom{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--ink-muted);margin-bottom:5px;}
+.pw-title{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:5px;}
+.pw-desc{font-size:11px;color:var(--ink-light);margin-bottom:7px;line-height:1.55;}
+.pw-ex{font-family:'DM Mono',monospace;font-size:9px;color:var(--amber);padding:3px 7px;background:var(--amber-light);border:1px solid rgba(217,119,6,.2);margin-bottom:6px;}
+.pw-fail{font-size:10px;color:var(--red);margin-bottom:5px;}
+.pw-bgc{display:flex;gap:4px;}
+.pw-btag{font-family:'DM Mono',monospace;font-size:8px;padding:2px 5px;background:var(--red-light);color:var(--red);border:1px solid rgba(153,27,27,.2);}
+
+/* ── ACTIONS ── */
+.ac-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;}
+.acc{background:var(--bg-card);border:1px solid var(--border);box-shadow:var(--sh);padding:13px;cursor:pointer;transition:all .2s;}
+.acc:hover{border-color:var(--purple-mid);box-shadow:var(--shm);}
+.acc-icon{font-size:20px;margin-bottom:7px;}
+.acc-title{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+.acc-desc{font-size:10px;color:var(--ink-light);line-height:1.5;}
+.acc-eff{font-family:'DM Mono',monospace;font-size:9px;margin-top:5px;padding:2px 6px;display:inline-block;border:1px solid;}
+.ae-p{color:var(--green);border-color:var(--green);background:var(--green-light);}
+.ae-n{color:var(--red);border-color:var(--red);background:var(--red-light);}
+.ae-m{color:var(--amber);border-color:var(--amber);background:var(--amber-light);}
+.out-box{background:var(--bg-warm);border:1px solid var(--border);padding:12px;font-family:'DM Mono',monospace;font-size:11px;line-height:1.9;color:var(--ink-light);min-height:80px;white-space:pre-wrap;}
+
+/* ACTOR TABLE */
+.actor-tbl{width:100%;border-collapse:collapse;font-size:11px;}
+.actor-tbl th{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;color:var(--ink-muted);text-align:left;padding:6px 8px;border-bottom:1.5px solid var(--border);}
+.actor-tbl td{padding:7px 8px;border-bottom:1px solid var(--bg-warm);}
+.actor-tbl tr:hover td{background:var(--bg-warm);}
+.role-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;}
+
+/* UTIL */
+.gc-c{color:var(--green);}.ac-c{color:var(--amber);}.rc-c{color:var(--red);}.pc-c{color:var(--purple-mid);}.tc-c{color:var(--teal);}
+
+footer{margin-top:32px;padding:14px 0;border-top:1px solid var(--border);display:flex;justify-content:space-between;}
+.fl{font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);letter-spacing:.5px;}
+.fr{font-family:'Libre Baskerville',serif;font-size:11px;color:var(--ink-muted);font-style:italic;}
+
+@media(max-width:960px){
+  .arch-flow,.cfg-row,.st-grid,.bgc-grid,.pw-grid,.ac-grid,.score-chain,.g2,.g3{grid-template-columns:1fr;}
+  .gwc-strip{grid-template-columns:1fr;}
+  .cmap-row{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+<!-- NAV -->
+<div class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <div class="brand-icon">AL</div>
+      <div class="brand-name">Auracelle Lyra
+        <small>Assurance Governance Simulation Platform</small>
+      </div>
+    </div>
+    <div class="nav-pages">
+      <button class="npg p1c">E-AGPO · Policy Metrics</button>
+      <button class="npg p2c">E-AGSO · Assurance Stress-Test</button>
+      <button class="npg p3c">E-AGPO-HT Sandbox ← new</button>
+    </div>
+    <div class="nav-badge">INTEGRATION PROPOSAL</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- INTEGRATION BANNER -->
+<div class="int-banner">
+  <div class="int-tag">NOTEBOOK → LYRA V3 · INTEGRATION ARCHITECTURE</div>
+  <div class="int-title">What Your Notebook Contains — And Where It Lives in v3</div>
+  <div class="int-desc">Your .ipynb contains five distinct, production-quality components. Four enrich the existing v3 pages. One — the full multi-domain simulation sandbox — becomes a new Page 3. This interactive artifact demonstrates Page 3 in complete working form, and shows exactly where each notebook element integrates.</div>
+</div>
+
+<!-- ARCHITECTURE FLOW -->
+<div class="arch-flow">
+  <div class="af-node af-p1">
+    <div class="af-ptag" style="color:var(--blue-dark)">PAGE 1 · E-AGPO</div>
+    <div class="af-ptitle">AI Governance Policy Metrics</div>
+    <div class="af-items">
+      ✓ NOF Calculator (10 indicators)<br>
+      ✓ Country wargaming<br>
+      ✓ Document upload + Claude extraction<br>
+      <span class="af-new">+ NOF_DEFS canonical weights<br>
+      + Registry indicator names</span>
+    </div>
+  </div>
+  <div class="af-arr">
+    <div class="af-arr-sym">⟷</div>
+    <div class="af-arr-lbl">SCORE<br>FEED</div>
+  </div>
+  <div class="af-node af-p3">
+    <div class="af-ptag" style="color:var(--purple-mid)">PAGE 3 · NEW</div>
+    <div class="af-ptitle">E-AGPO-HT Sandbox</div>
+    <div class="af-items">
+      ★ Full NOF Registry — 6 domains<br>
+      ★ Game State s_t = (P,A,C,V,R)<br>
+      ★ score_lyra_end_to_end()<br>
+      ★ Governance Neural Network<br>
+      ★ INFCIRC Compliance Convergence<br>
+      ★ BGC → g-GWC Engine<br>
+      ★ Proliferation Pathways<br>
+      ★ Actions &amp; Shocks
+    </div>
+  </div>
+  <div class="af-arr">
+    <div class="af-arr-sym">⟷</div>
+    <div class="af-arr-lbl">SCORE<br>FEED</div>
+  </div>
+  <div class="af-node af-p2">
+    <div class="af-ptag" style="color:var(--teal)">PAGE 2 · E-AGSO</div>
+    <div class="af-ptitle">Assurance Stress-Tester</div>
+    <div class="af-items">
+      ✓ Evasion matrix (6 vectors)<br>
+      ✓ Continuity of Knowledge<br>
+      ✓ Nuclear auditor scenarios<br>
+      <span class="af-new">+ DOMAIN_CONFIGS actor sets<br>
+      + NUC/BIO/QTM NOF definitions</span>
+    </div>
+  </div>
+</div>
+
+<!-- COMPONENT MAP -->
+<div class="cmap mb22">
+  <div class="cmap-hd">
+    <div class="cmap-hd-title">Notebook Component Integration Map</div>
+    <div class="cmap-hd-sub">Every element in your .ipynb — where it goes and what it does</div>
+  </div>
+  <div class="cmap-row cmap-head">
+    <div class="cmap-cell">Component</div>
+    <div class="cmap-cell">What It Contains</div>
+    <div class="cmap-cell">Integration Target</div>
+    <div class="cmap-cell">Status</div>
+  </div>
+  <div class="cmap-row">
+    <div class="cmap-cell"><div class="cmap-comp">LYRA_NOF_REGISTRY</div></div>
+    <div class="cmap-cell cmap-desc">Canonical BAC01–BAC07 with 6-domain NOF-to-BAC mappings, per-NOF weights and thresholds — the authoritative scoring schema</div>
+    <div class="cmap-cell cmap-dest"><span class="d-p3">Page 3 — registry engine</span><br><span class="d-p1" style="font-size:9px">Page 1 — calibrates NOF weights</span></div>
+    <div class="cmap-cell cmap-status"><div class="st-new">New in P3</div></div>
+  </div>
+  <div class="cmap-row">
+    <div class="cmap-cell"><div class="cmap-comp">LYRA_STARTER_INDICATORS</div></div>
+    <div class="cmap-cell cmap-desc">28 normalized [0,1] baseline indicator values per domain — ready-to-run defaults without manual configuration</div>
+    <div class="cmap-cell cmap-dest"><span class="d-p3">Page 3 — slider defaults</span></div>
+    <div class="cmap-cell cmap-status"><div class="st-new">New in P3</div></div>
+  </div>
+  <div class="cmap-row">
+    <div class="cmap-cell"><div class="cmap-comp">score_lyra_end_to_end()</div></div>
+    <div class="cmap-cell cmap-desc">Full chain: indicators → NOF scores (equal-weight mean) → BAC scores (domain-weighted aggregation) → g-GACn (BAC-weighted sum). Replaces simplified sigmoid approach.</div>
+    <div class="cmap-cell cmap-dest"><span class="d-p3">Page 3 — live engine</span><br><span class="d-p1" style="font-size:9px">Page 1 — enriches NOF Calculator</span></div>
+    <div class="cmap-cell cmap-status"><div class="st-new">New in P3</div></div>
+  </div>
+  <div class="cmap-row">
+    <div class="cmap-cell"><div class="cmap-comp">GameState s_t=(P,A,C,V,R)</div></div>
+    <div class="cmap-cell cmap-desc">Five-tuple state vector updated via bgc_to_state() — verification coverage, detection confidence, compliance gap, trust, legitimacy all flow from BGC values</div>
+    <div class="cmap-cell cmap-dest"><span class="d-p3">Page 3 — Game State tab</span></div>
+    <div class="cmap-cell cmap-status"><div class="st-new">New in P3</div></div>
+  </div>
+  <div class="cmap-row">
+    <div class="cmap-cell"><div class="cmap-comp">DOMAIN_CONFIGS</div></div>
+    <div class="cmap-cell cmap-desc">6 domains × roles, standards, countries, actor node definitions (3D positions, 5 parameters each), and proliferation pathways with BGC weakness mapping</div>
+    <div class="cmap-cell cmap-dest"><span class="d-p3">Page 3 — domain selector + pathways</span><br><span class="d-p2" style="font-size:9px">Page 2 — enriches scenario library</span></div>
+    <div class="cmap-cell cmap-status"><div class="st-enr">Enriches P2</div></div>
+  </div>
+  <div class="cmap-row">
+    <div class="cmap-cell"><div class="cmap-comp">GovernanceNeuralNetwork</div></div>
+    <div class="cmap-cell cmap-desc">Actor graph with domain-specific nodes (authority, resources, independence, expertise, centrality), directed edges with attenuation/delay/trust parameters, AlphaFold-style 3D layout</div>
+    <div class="cmap-cell cmap-dest"><span class="d-p3">Page 3 — Governance Network tab</span></div>
+    <div class="cmap-cell cmap-status"><div class="st-new">New in P3</div></div>
+  </div>
+  <div class="cmap-row">
+    <div class="cmap-cell"><div class="cmap-comp">Compliance Convergence Viz</div></div>
+    <div class="cmap-cell cmap-desc">Three.js 3D animation: 20 real INFCIRC actors (Iran, Syria, DPRK, Japan…) animated from current → target compliance. Color = tier, node size = gap severity, timeline control</div>
+    <div class="cmap-cell cmap-dest"><span class="d-p3">Page 3 — Convergence tab</span></div>
+    <div class="cmap-cell cmap-status"><div class="st-new">New in P3</div></div>
+  </div>
+  <div class="cmap-row">
+    <div class="cmap-cell"><div class="cmap-comp">API Integration Layer</div></div>
+    <div class="cmap-cell cmap-desc">World Bank GDP/governance, IAEA PRIS reactor data, US export controls screening list, space debris, clinical trials — structure ready, simulated values provided</div>
+    <div class="cmap-cell cmap-dest"><span class="d-p3">Page 3 — Live Data panel</span></div>
+    <div class="cmap-cell cmap-status"><div class="st-enr">Enriches P3</div></div>
+  </div>
+  <div class="cmap-row">
+    <div class="cmap-cell"><div class="cmap-comp">NOF_DEFS + EAGPOHTFramework</div></div>
+    <div class="cmap-cell cmap-desc">AI-domain indicator definitions and BGC weight configuration — already present in v3 Page 1, now matched to canonical registry weights</div>
+    <div class="cmap-cell cmap-dest"><span class="d-p1">Page 1 — weight calibration</span></div>
+    <div class="cmap-cell cmap-status"><div class="st-has">In P1 already</div></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PAGE 3 — FULL IMPLEMENTATION
+══════════════════════════════════════ -->
+<div class="p3-hd">
+  <div class="p3-eng">Page 3 · E-AGPO-HT Simulation Sandbox</div>
+  <div class="p3-title">Full Wargaming Environment — Live Demo</div>
+  <div class="p3-desc">The complete simulation layer from your notebook — domain selection, role/standard/country configuration, canonical registry scoring, 3D governance network, and compliance convergence animation. Scores computed here feed back into Pages 1 and 2 master metrics.</div>
+</div>
+
+<!-- DOMAIN SELECTOR -->
+<div class="dom-bar" id="dom-bar">
+  <button class="dbn active" onclick="setDomain('Nuclear',this)">⚛️ Nuclear</button>
+  <button class="dbn" onclick="setDomain('AI',this)">🤖 AI</button>
+  <button class="dbn" onclick="setDomain('Space',this)">🛰️ Space</button>
+  <button class="dbn" onclick="setDomain('Biotech',this)">🧬 Biotech</button>
+  <button class="dbn" onclick="setDomain('Renewable',this)">🌱 Renewable</button>
+  <button class="dbn" onclick="setDomain('Quantum',this)">⚡ Quantum</button>
+</div>
+
+<!-- g-GWC MASTER -->
+<div class="gwc-strip">
+  <div>
+    <div class="gwc-lbl">g-GWC · STRATUM III</div>
+    <div class="gwc-val pc-c" id="gwc-val">0.724</div>
+    <div class="gwc-sub" id="gwc-dom-lbl">Nuclear · BGC → g-GWC</div>
+  </div>
+  <div>
+    <div class="bar-hd"><span>0.0 Critical</span><span>0.5</span><span>0.8 Target</span><span>1.0</span></div>
+    <div class="bar-tr">
+      <div class="bar-th" style="left:80%" data-l="θ=0.80"></div>
+      <div class="bar-fi" id="gwc-bar" style="width:72.4%;background:var(--amber)"></div>
+    </div>
+    <div style="margin-top:5px;font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted)">Stratum I→II→III chain · EAGPOHTFramework</div>
+  </div>
+  <div style="text-align:right">
+    <div class="chip chip-w" id="gwc-chip">Below Target</div>
+    <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--ink-muted);margin-top:6px" id="gwc-delta">Δ = −0.076 to θ=0.80</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="p3-tabs">
+  <button class="p3t on" onclick="swTab('gamestate',this)">Game State</button>
+  <button class="p3t" onclick="swTab('registry',this)">Registry Scoring</button>
+  <button class="p3t" onclick="swTab('bgc',this)">BGC Engine</button>
+  <button class="p3t" onclick="swTab('gnn',this)">Governance Network</button>
+  <button class="p3t" onclick="swTab('convergence',this)">Compliance Convergence</button>
+  <button class="p3t" onclick="swTab('pathways',this)">Proliferation Pathways</button>
+  <button class="p3t" onclick="swTab('actions',this)">Actions &amp; Shocks</button>
+</div>
+
+<!-- TAB: GAME STATE -->
+<div class="p3pnl on" id="pnl-gamestate">
+  <div class="cfg-row mb16">
+    <div class="cfg-card">
+      <div class="cfg-lbl">Your Role</div>
+      <select class="cfg-sel" id="role-sel" onchange="updateGS()"></select>
+      <div class="cfg-inf" id="role-inf">Playing as: IAEA Inspector</div>
+    </div>
+    <div class="cfg-card">
+      <div class="cfg-lbl">Standard Under Review</div>
+      <select class="cfg-sel" id="std-sel" onchange="updateGS()"></select>
+      <div class="cfg-inf" id="std-inf">Testing: INFCIRC/153</div>
+    </div>
+    <div class="cfg-card">
+      <div class="cfg-lbl">Country / Entity</div>
+      <select class="cfg-sel" id="ctry-sel" onchange="updateGS()"></select>
+      <div class="cfg-inf" id="ctry-inf">Context: Generic State</div>
+    </div>
+  </div>
+
+  <div class="st-grid mb16">
+    <div class="stc">
+      <div class="stc-lbl">P_t</div><div class="stc-title">Policy</div>
+      <div class="stc-row"><span class="stc-nm">Stringency</span><span class="stc-vl gc-c" id="gs-ps">0.71</span></div>
+      <div class="stc-row"><span class="stc-nm">Coverage</span><span class="stc-vl ac-c" id="gs-pc">0.58</span></div>
+    </div>
+    <div class="stc">
+      <div class="stc-lbl">A_t</div><div class="stc-title">Actor</div>
+      <div class="stc-row"><span class="stc-nm">Capability</span><span class="stc-vl gc-c" id="gs-ac">0.60</span></div>
+      <div class="stc-row"><span class="stc-nm">Incentive</span><span class="stc-vl ac-c" id="gs-ai">0.55</span></div>
+      <div class="stc-row"><span class="stc-nm">Access</span><span class="stc-vl ac-c" id="gs-aa">0.44</span></div>
+    </div>
+    <div class="stc">
+      <div class="stc-lbl">C_t</div><div class="stc-title">Compliance</div>
+      <div class="stc-row"><span class="stc-nm">Formal</span><span class="stc-vl gc-c" id="gs-cf">0.85</span></div>
+      <div class="stc-row"><span class="stc-nm">Actual</span><span class="stc-vl ac-c" id="gs-ca">0.70</span></div>
+      <div class="stc-row"><span class="stc-nm">Gap</span><span class="stc-vl rc-c" id="gs-cg">0.15 ⚠</span></div>
+    </div>
+    <div class="stc">
+      <div class="stc-lbl">V_t</div><div class="stc-title">Verification</div>
+      <div class="stc-row"><span class="stc-nm">Coverage</span><span class="stc-vl ac-c" id="gs-vc">0.60</span></div>
+      <div class="stc-row"><span class="stc-nm">Confidence</span><span class="stc-vl ac-c" id="gs-vk">0.60</span></div>
+      <div class="stc-row"><span class="stc-nm">Capacity</span><span class="stc-vl ac-c" id="gs-vi">0.53</span></div>
+    </div>
+    <div class="stc">
+      <div class="stc-lbl">R_t</div><div class="stc-title">Risk / Trust</div>
+      <div class="stc-row"><span class="stc-nm">Systemic Trust</span><span class="stc-vl gc-c" id="gs-rt">0.59</span></div>
+      <div class="stc-row"><span class="stc-nm">Detection Risk</span><span class="stc-vl ac-c" id="gs-rd">0.44</span></div>
+      <div class="stc-row"><span class="stc-nm">Legitimacy</span><span class="stc-vl ac-c" id="gs-rl">0.59</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-t">State Formula — bgc_to_state() mapping</div>
+    <div class="card-s">STRATUM II BGC VALUES → GAME STATE VECTOR s_t</div>
+    <div class="mono-box" id="state-formula">
+V_t.coverage    = BGC[STI] × 0.80 = 0.600
+V_t.confidence  = BGC[SAD] × 0.85 = 0.595
+P_t.coverage    = BGC[NDM] × 0.80 = 0.576
+R_t.trust       = BGC[SRA] × 0.85 = 0.587
+A_t.access      = 1 − BGC[IIC] × 0.70 = 0.440
+R_t.legitimacy  = BGC[ASI] × 0.90 = 0.585</div>
+  </div>
+</div>
+
+<!-- TAB: REGISTRY SCORING -->
+<div class="p3pnl" id="pnl-registry">
+  <div class="g2">
+    <div class="card">
+      <div class="card-t">Registry Scoring — Indicator → NOF → BAC → g-GACn</div>
+      <div class="card-s">CANONICAL LYRA_NOF_REGISTRY · score_lyra_end_to_end() · DOMAIN: <span id="reg-dom" style="color:var(--purple-mid);font-weight:600">NUCLEAR</span></div>
+      <div style="font-size:11px;color:var(--ink-light);margin-bottom:12px;line-height:1.7">Adjust individual indicators. Scores propagate through the full chain: indicator means → NOF scores → BAC aggregation → g-GACn. This is your notebook's <span style="color:var(--purple-mid);font-weight:600">score_lyra_end_to_end()</span> function running live in-browser.</div>
+      <div class="ind-grid" id="ind-sliders"></div>
+    </div>
+    <div class="gcol">
+      <div class="score-chain">
+        <div class="scl">
+          <div class="scl-t">Stratum I · NOF</div>
+          <div id="nof-list"></div>
+        </div>
+        <div class="sc-arr">→</div>
+        <div class="scl">
+          <div class="scl-t">Stratum II · BAC</div>
+          <div id="bac-list"></div>
+        </div>
+        <div class="sc-arr">→</div>
+        <div class="scl">
+          <div class="scl-t">Stratum III</div>
+          <div class="gg-wrap">
+            <div class="gg-lbl">g-GACn</div>
+            <div class="gg-val ac-c" id="gg-val">0.578</div>
+            <div class="gg-theta">θ = 0.80</div>
+            <div class="gg-bt">
+              <div class="gg-th" style="left:80%" data-l="θ=0.80"></div>
+              <div class="gg-bf" id="gg-bar" style="width:57.8%;background:var(--amber)"></div>
+            </div>
+            <div class="chip chip-w" id="gg-chip" style="font-size:9px;padding:3px 8px">Below θ</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: BGC ENGINE -->
+<div class="p3pnl" id="pnl-bgc">
+  <div class="bgc-grid" id="bgc-grid"></div>
+  <div class="card">
+    <div class="card-t">BGC Dimension Reference</div>
+    <div class="card-s">E-AGPO-HT STRATUM II · 7 BOUNDED GOVERNANCE CAPABILITIES</div>
+    <div id="bgc-desc"></div>
+  </div>
+</div>
+
+<!-- TAB: GNN -->
+<div class="p3pnl" id="pnl-gnn">
+  <div class="card mb16">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div class="card-t">Governance Neural Network — 3D Actor Graph</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);letter-spacing:1px;margin-top:2px">DOMAIN: <span id="gnn-dom" style="color:var(--purple-mid);font-weight:600">NUCLEAR</span> · <span id="gnn-ac">7 actors</span> · AUTO-ROTATING</div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="cbtn cbtn-s" onclick="gnnRotDir=-gnnRotDir">⇄ Reverse</button>
+        <button class="cbtn cbtn-p" onclick="resetGNN()">Reset View</button>
+      </div>
+    </div>
+    <div class="gnn-wrap"><canvas id="gnn-cvs"></canvas></div>
+    <div class="gnn-leg" id="gnn-leg"></div>
+  </div>
+  <div class="card">
+    <div class="card-t">Actor Node Parameters</div>
+    <div class="card-s">INSTITUTIONAL AUTHORITY · RESOURCE CAPACITY · POLITICAL INDEPENDENCE · TECHNICAL EXPERTISE · NETWORK CENTRALITY</div>
+    <div style="overflow-x:auto"><table class="actor-tbl" id="actor-tbl"></table></div>
+  </div>
+</div>
+
+<!-- TAB: CONVERGENCE -->
+<div class="p3pnl" id="pnl-convergence">
+  <div class="card mb16">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div class="card-t">INFCIRC Compliance Convergence Animation</div>
+        <div style="font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted);letter-spacing:1px;margin-top:2px">20 REAL SAFEGUARDS ACTORS · CURRENT → TARGET COMPLIANCE · THREE.JS 3D</div>
+      </div>
+      <select id="conv-tgt" style="padding:6px 10px;border:1px solid var(--border);font-family:'DM Mono',monospace;font-size:10px;background:var(--bg-card)" onchange="convTarget=parseFloat(this.value)">
+        <option value="0.75">Target: 75%</option>
+        <option value="0.90">Target: 90%</option>
+        <option value="1.00" selected>Target: 100%</option>
+      </select>
+    </div>
+    <div class="conv-wrap"><canvas id="conv-cvs"></canvas></div>
+    <div class="conv-ctrl">
+      <button class="cbtn cbtn-p" id="conv-play-btn" onclick="toggleConv()">▶ Animate</button>
+      <button class="cbtn cbtn-s" onclick="resetConv()">↺ Reset</button>
+      <div class="cstat">Avg Compliance <span id="conv-avg">35%</span></div>
+      <div class="cstat">Critical Failures <span id="conv-crit">4</span></div>
+      <div class="cstat">Month <span id="conv-mo">0</span></div>
+      <div style="display:flex;align-items:center;gap:8px;font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-muted)">
+        Speed <input type="range" min="1" max="10" value="5" id="conv-spd" style="width:70px">
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-t">Actor Compliance Legend</div>
+    <div class="card-s">COLOR = COMPLIANCE TIER · NODE SIZE = GAP SEVERITY · POSITION = SAFEGUARDS POSTURE SPACE</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px"><div style="width:11px;height:11px;border-radius:50%;background:#e63946"></div>Critical (&lt;40%)</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px"><div style="width:11px;height:11px;border-radius:50%;background:#f4a261"></div>High Failure (40–60%)</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px"><div style="width:11px;height:11px;border-radius:50%;background:#e9c46a"></div>Medium (60–75%)</div>
+      <div style="display:flex;align-items:center;gap:6px;font-size:11px"><div style="width:11px;height:11px;border-radius:50%;background:#52b788"></div>Compliant (&gt;75%)</div>
+    </div>
+    <div id="conv-legend" style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px;font-family:'DM Mono',monospace;font-size:9px;color:var(--ink-light)"></div>
+  </div>
+</div>
+
+<!-- TAB: PATHWAYS -->
+<div class="p3pnl" id="pnl-pathways">
+  <div class="pw-grid" id="pw-grid"></div>
+</div>
+
+<!-- TAB: ACTIONS -->
+<div class="p3pnl" id="pnl-actions">
+  <div class="ac-grid" id="ac-grid"></div>
+  <div class="out-box" id="ac-out"><span style="color:var(--ink-muted)">Select an action or shock above to observe cascade effects through the s_t state vector and BGC dimensions.</span></div>
+</div>
+
+<footer>
+  <div class="fl">Auracelle AI Governance Labs · Director G.A. Evans · E-AGPO-HT Framework · Integration Proposal — Lyra v3 + Notebook</div>
+  <div class="fr">Page 3 Demo</div>
+</footer>
+</div>
+<script>
+const REG = {
+  BAC:{BAC01:{name:"Standards Clarity & Coherence",w:0.14,theta:0.75},BAC02:{name:"Verification & Testability",w:0.15,theta:0.78},BAC03:{name:"Auditability & Traceability",w:0.15,theta:0.78},BAC04:{name:"Certification & Accreditation Capacity",w:0.14,theta:0.75},BAC05:{name:"Interoperability & Conformance",w:0.14,theta:0.75},BAC06:{name:"Operational Compliance & Enforcement",w:0.14,theta:0.75},BAC07:{name:"Resilience Under Stress & Change",w:0.14,theta:0.75}},
+  gGACn_theta:0.80,
+  domains:{
+    Nuclear:{NOFs:[{id:"NUC_01",name:"Requirements & Safety Case Clarity",bac:"BAC01",w:0.15,theta:0.78,inds:["safety_case_completeness","requirements_traceability","hazard_analysis_quality","scope_boundary_clarity"]},{id:"NUC_02",name:"Verification of Safeguards Measures",bac:"BAC02",w:0.16,theta:0.80,inds:["inspection_test_rigor","measurement_uncertainty_control","tamper_resistance_tested","anomaly_detection_validation"]},{id:"NUC_03",name:"Chain-of-Custody & Material Accountancy",bac:"BAC03",w:0.16,theta:0.80,inds:["material_balance_area_coverage","seal_integrity_rate","record_integrity_controls","audit_frequency_adequacy"]},{id:"NUC_04",name:"Accreditation & Inspectorate Capacity",bac:"BAC04",w:0.13,theta:0.75,inds:["inspector_training_depth","lab_accreditation_status","calibration_program_strength","third_party_review_quality"]},{id:"NUC_05",name:"Interoperable Reporting & Data Exchange",bac:"BAC05",w:0.12,theta:0.70,inds:["reporting_standard_conformance","secure_data_exchange_readiness","format_interoperability","cross_agency_data_alignment"]},{id:"NUC_06",name:"Compliance Enforcement & Corrective Action",bac:"BAC06",w:0.16,theta:0.80,inds:["nonconformance_handling_strength","corrective_action_timeliness","sanction_escalation_clarity","oversight_independence"]},{id:"NUC_07",name:"Resilience Under Incident & Stress",bac:"BAC07",w:0.12,theta:0.75,inds:["emergency_preparedness_quality","continuity_of_operations","stress_test_frequency","lessons_learned_integration"]}]},
+    AI:{NOFs:[{id:"AI_01",name:"Model Documentation Sufficiency",bac:"BAC01",w:0.12,theta:0.70,inds:["doc_coverage_rate","assumption_disclosure_quality","known_limitations_disclosure","intended_use_clarity"]},{id:"AI_02",name:"Evaluation & Test Protocol Rigor",bac:"BAC02",w:0.14,theta:0.75,inds:["test_suite_completeness","out_of_distribution_testing","red_team_frequency","reproducibility_rate"]},{id:"AI_03",name:"Provenance & Traceability Controls",bac:"BAC03",w:0.13,theta:0.75,inds:["data_lineage_coverage","model_versioning_integrity","training_run_audit_trail","artifact_retention_policy_strength"]},{id:"AI_04",name:"Assurance Case & Evidence Integrity",bac:"BAC04",w:0.12,theta:0.70,inds:["assurance_case_completeness","evidence_chain_integrity","independent_validation_presence","conflict_of_interest_controls"]},{id:"AI_05",name:"Interoperable Controls & Conformance",bac:"BAC05",w:0.12,theta:0.70,inds:["api_control_consistency","logging_schema_conformance","policy_control_portability","standard_mapping_coverage"]},{id:"AI_06",name:"Operational Compliance Readiness",bac:"BAC06",w:0.19,theta:0.78,inds:["access_control_effectiveness","incident_response_readiness","continuous_monitoring_coverage","enforcement_mechanism_strength"]},{id:"AI_07",name:"Change Control & Drift Management",bac:"BAC07",w:0.18,theta:0.75,inds:["model_drift_detection_quality","rollback_capability","change_approval_rigor","post_deploy_validation_rate"]}]},
+    Space:{NOFs:[{id:"SPC_01",name:"Orbital Safety Standards Clarity",bac:"BAC01",w:0.14,theta:0.72,inds:["debris_mitigation_coverage","collision_avoidance_protocol","deorbit_requirement_clarity","space_traffic_coordination"]},{id:"SPC_02",name:"Verification of Compliance Obligations",bac:"BAC02",w:0.16,theta:0.75,inds:["telemetry_verification_quality","maneuver_reporting_rigor","eol_compliance_testing","anomaly_detection_validation"]},{id:"SPC_03",name:"Object Registry & Traceability",bac:"BAC03",w:0.15,theta:0.75,inds:["registration_completeness","tracking_data_integrity","ownership_chain_clarity","launch_record_retention"]},{id:"SPC_04",name:"Launch Authority & Licensing Capacity",bac:"BAC04",w:0.13,theta:0.72,inds:["license_review_depth","technical_expertise_adequacy","third_party_assessment","mega_constellation_capacity"]},{id:"SPC_05",name:"Interoperable Data & Coordination",bac:"BAC05",w:0.15,theta:0.72,inds:["itu_coordination_compliance","cross_agency_data_sharing","format_standardization","conjunction_alert_interop"]},{id:"SPC_06",name:"Enforcement & Compliance Mechanisms",bac:"BAC06",w:0.15,theta:0.75,inds:["eol_enforcement_strength","noncompliance_penalties","oversight_independence","corrective_action_timeliness"]},{id:"SPC_07",name:"Resilience to Cascading Debris Events",bac:"BAC07",w:0.12,theta:0.70,inds:["kessler_syndrome_modeling","emergency_maneuver_capability","continuity_of_operations","lessons_learned_integration"]}]},
+    Biotech:{NOFs:[{id:"BIO_01",name:"Protocol & Biosafety Standard Clarity",bac:"BAC01",w:0.15,theta:0.75,inds:["protocol_spec_quality","biosafety_standard_coverage","risk_classification_clarity","scope_boundary_clarity"]},{id:"BIO_02",name:"Verification of Lab Processes",bac:"BAC02",w:0.16,theta:0.78,inds:["assay_validation_quality","repeatability_rate","control_group_rigor","contamination_detection_strength"]},{id:"BIO_03",name:"Sample Provenance & Chain-of-Custody",bac:"BAC03",w:0.16,theta:0.80,inds:["sample_tracking_completeness","custody_integrity_controls","data_integrity_controls","record_retention_strength"]},{id:"BIO_04",name:"Accreditation & QA/QC Maturity",bac:"BAC04",w:0.13,theta:0.72,inds:["qa_qc_procedures_maturity","lab_accreditation_status","proficiency_testing_frequency","independent_audit_presence"]},{id:"BIO_05",name:"Interoperability of Reporting Standards",bac:"BAC05",w:0.12,theta:0.70,inds:["data_standard_alignment","cross_lab_exchange_readiness","semantic_consistency","secure_sharing_controls"]},{id:"BIO_06",name:"Compliance & Oversight Enforcement",bac:"BAC06",w:0.16,theta:0.75,inds:["oversight_independence","noncompliance_handling_strength","incident_reporting_timeliness","corrective_action_effectiveness"]},{id:"BIO_07",name:"Resilience to Dual-Use & Supply Stress",bac:"BAC07",w:0.12,theta:0.70,inds:["dual_use_risk_controls","supply_chain_assurance","continuity_of_operations","lessons_learned_integration"]}]},
+    Renewable:{NOFs:[{id:"REN_01",name:"Standards Coverage for Grid & Safety",bac:"BAC01",w:0.14,theta:0.72,inds:["grid_code_alignment","safety_standard_coverage","site_requirements_clarity","documentation_quality"]},{id:"REN_02",name:"Verification of Performance & Reliability",bac:"BAC02",w:0.16,theta:0.75,inds:["performance_test_rigor","reliability_testing_depth","measurement_verification_quality","third_party_test_presence"]},{id:"REN_03",name:"Telemetry, Logging & Traceability",bac:"BAC03",w:0.14,theta:0.72,inds:["telemetry_coverage","log_integrity_controls","asset_identity_management","maintenance_record_quality"]},{id:"REN_04",name:"Certification & Inspection Capacity",bac:"BAC04",w:0.13,theta:0.72,inds:["inspector_availability","certification_scheme_maturity","calibration_program_strength","audit_readiness"]},{id:"REN_05",name:"Interoperability with Grid Operations",bac:"BAC05",w:0.17,theta:0.78,inds:["interop_test_success_rate","scada_integration_quality","data_exchange_standard_alignment","control_stability"]},{id:"REN_06",name:"Compliance Enforcement & Safety Gov.",bac:"BAC06",w:0.14,theta:0.72,inds:["noncompliance_response_strength","safety_incident_handling","regulatory_reporting_quality","vendor_accountability"]},{id:"REN_07",name:"Resilience to Cyber/Weather/Market Stress",bac:"BAC07",w:0.12,theta:0.70,inds:["cyber_resilience_posture","extreme_weather_preparedness","supply_chain_resilience","recovery_time_objectives"]}]},
+    Quantum:{NOFs:[{id:"QTM_01",name:"Specification Clarity for Quantum Claims",bac:"BAC01",w:0.14,theta:0.72,inds:["claim_precision","assumption_transparency","benchmark_definition_quality","threat_model_clarity"]},{id:"QTM_02",name:"Benchmarking & Testability",bac:"BAC02",w:0.17,theta:0.78,inds:["benchmark_repeatability","noise_characterization_quality","cross_platform_comparability","experimental_control_rigor"]},{id:"QTM_03",name:"Experimental Traceability & Data Integrity",bac:"BAC03",w:0.15,theta:0.75,inds:["raw_data_retention_strength","metadata_completeness","lab_notebook_integrity","analysis_pipeline_versioning"]},{id:"QTM_04",name:"Certification Readiness for QKD/PQC",bac:"BAC04",w:0.14,theta:0.75,inds:["cert_scheme_alignment","independent_lab_access","implementation_assurance_depth","side_channel_test_coverage"]},{id:"QTM_05",name:"Interoperability for PQC Migration",bac:"BAC05",w:0.15,theta:0.75,inds:["interop_test_results","protocol_compatibility","migration_plan_quality","key_management_alignment"]},{id:"QTM_06",name:"Operational Controls & Governance",bac:"BAC06",w:0.14,theta:0.72,inds:["access_control_strength","supply_chain_assurance","secure_ops_procedures","compliance_monitoring_coverage"]},{id:"QTM_07",name:"Resilience to Rapid Standards Evolution",bac:"BAC07",w:0.11,theta:0.70,inds:["standards_watch_capability","update_rollout_readiness","crypto_agility","deprecation_management"]}]}
+  }
+};
+
+const STARTERS={
+  Nuclear:{safety_case_completeness:0.65,requirements_traceability:0.60,hazard_analysis_quality:0.60,scope_boundary_clarity:0.65,inspection_test_rigor:0.65,measurement_uncertainty_control:0.60,tamper_resistance_tested:0.55,anomaly_detection_validation:0.55,material_balance_area_coverage:0.60,seal_integrity_rate:0.60,record_integrity_controls:0.60,audit_frequency_adequacy:0.55,inspector_training_depth:0.55,lab_accreditation_status:0.60,calibration_program_strength:0.55,third_party_review_quality:0.55,reporting_standard_conformance:0.60,secure_data_exchange_readiness:0.50,format_interoperability:0.55,cross_agency_data_alignment:0.50,nonconformance_handling_strength:0.60,corrective_action_timeliness:0.55,sanction_escalation_clarity:0.50,oversight_independence:0.55,emergency_preparedness_quality:0.60,continuity_of_operations:0.55,stress_test_frequency:0.50,lessons_learned_integration:0.55},
+  AI:{doc_coverage_rate:0.70,assumption_disclosure_quality:0.60,known_limitations_disclosure:0.55,intended_use_clarity:0.65,test_suite_completeness:0.60,out_of_distribution_testing:0.50,red_team_frequency:0.55,reproducibility_rate:0.60,data_lineage_coverage:0.55,model_versioning_integrity:0.65,training_run_audit_trail:0.55,artifact_retention_policy_strength:0.60,assurance_case_completeness:0.55,evidence_chain_integrity:0.60,independent_validation_presence:0.45,conflict_of_interest_controls:0.55,api_control_consistency:0.60,logging_schema_conformance:0.55,policy_control_portability:0.50,standard_mapping_coverage:0.55,access_control_effectiveness:0.60,incident_response_readiness:0.55,continuous_monitoring_coverage:0.55,enforcement_mechanism_strength:0.50,model_drift_detection_quality:0.50,rollback_capability:0.60,change_approval_rigor:0.55,post_deploy_validation_rate:0.55}
+};
+['Space','Biotech','Renewable','Quantum'].forEach(d=>{STARTERS[d]={};REG.domains[d].NOFs.forEach(n=>n.inds.forEach(i=>{STARTERS[d][i]=0.55;}));});
+
+const DCFG={
+  Nuclear:{roles:["IAEA Inspector","National Regulator","Facility Operator","Certifier","Red Team State"],standards:["INFCIRC/153","INFCIRC/540","IAEA STR-388"],countries:["Generic State","Iran (2003 scenario)","Syria (2007 scenario)","SMR Developer State"],actors:[{n:"IAEA_Safeguards",r:"Regulator",p:[0,0,2.5],au:0.85,re:0.70,in:0.80,ex:0.85,ce:0.90},{n:"National_Inspector",r:"Inspector",p:[-2,1.5,1],au:0.70,re:0.60,in:0.50,ex:0.65,ce:0.45},{n:"Certifier_ISO",r:"Certifier",p:[2,1.5,1],au:0.75,re:0.65,in:0.70,ex:0.70,ce:0.60},{n:"Independent_Auditor",r:"Auditor",p:[-1.5,-1.5,0.5],au:0.72,re:0.68,in:0.75,ex:0.73,ce:0.40},{n:"SMR_Developer",r:"Developer",p:[1.5,-1.5,0],au:0.60,re:0.70,in:0.40,ex:0.80,ce:0.50},{n:"Facility_Operator",r:"Operator",p:[0,-2,-0.5],au:0.65,re:0.55,in:0.35,ex:0.60,ce:0.35},{n:"Adversarial_State",r:"RedTeam",p:[0,0,-2.5],au:0.40,re:0.85,in:0.20,ex:0.75,ce:0.70}],pw:{title:"Undeclared Enrichment",desc:"Parallel facilities outside safeguards scope",ex:"Iran 2003: 18 years undetected enrichment",fail:"INFCIRC/153 limited to declared facilities",bgc:["SAD","ASI"]}},
+  AI:{roles:["EU Certifier","Model Developer","Deployment Auditor","Red Team Researcher","National AI Safety Institute"],standards:["EU AI Act","ISO/IEC 42001","NIST AI RMF"],countries:["Generic Jurisdiction","EU Member State","US (Voluntary)","China (Emerging)"],actors:[{n:"EU_AI_Office",r:"Regulator",p:[0,0,2.5],au:0.80,re:0.65,in:0.75,ex:0.70,ce:0.85},{n:"Notified_Body_1",r:"Certifier",p:[-2,1.5,1],au:0.70,re:0.60,in:0.60,ex:0.65,ce:0.50},{n:"Notified_Body_2",r:"Certifier",p:[2,1.5,1],au:0.65,re:0.55,in:0.55,ex:0.60,ce:0.45},{n:"Model_Developer",r:"Developer",p:[-1.5,-1.5,0],au:0.60,re:0.75,in:0.40,ex:0.85,ce:0.55},{n:"Deployment_Auditor",r:"Auditor",p:[1.5,-1.5,0],au:0.68,re:0.62,in:0.70,ex:0.68,ce:0.40},{n:"RedTeam_Lab",r:"RedTeam",p:[0,-2,-1],au:0.55,re:0.80,in:0.50,ex:0.90,ce:0.60},{n:"Frontier_Lab",r:"Developer",p:[0,0,-2.5],au:0.50,re:0.90,in:0.30,ex:0.95,ce:0.75}],pw:{title:"Audit Shopping",desc:"Developers rotate certifiers for lenient assessment",ex:"23 providers gaming EU AI Act (2025)",fail:"Multiple certifiers with varying standards",bgc:["ASI","IIC"]}},
+  Space:{roles:["UNOOSA Inspector","Satellite Operator","Launch Authority","Debris Monitor","Mega-Constellation Operator"],standards:["ISO 24113","UN Debris Guidelines","ITU Coordination"],countries:["Generic State","US (Starlink)","China (State-owned)","Commercial Operator"],actors:[{n:"UNOOSA",r:"Regulator",p:[0,0,2.5],au:0.75,re:0.55,in:0.70,ex:0.65,ce:0.80},{n:"National_Space_Agency",r:"Regulator",p:[-2,1.5,1],au:0.70,re:0.60,in:0.65,ex:0.70,ce:0.60},{n:"Launch_Authority",r:"Certifier",p:[2,1.5,1],au:0.68,re:0.58,in:0.60,ex:0.68,ce:0.50},{n:"Satellite_Operator",r:"Operator",p:[-1.5,-1.5,0],au:0.60,re:0.65,in:0.40,ex:0.75,ce:0.45},{n:"Debris_Monitor",r:"Auditor",p:[1.5,-1.5,0],au:0.72,re:0.50,in:0.75,ex:0.60,ce:0.35},{n:"MegaConstellation",r:"RedTeam",p:[0,0,-2.5],au:0.55,re:0.80,in:0.30,ex:0.85,ce:0.70}],pw:{title:"Deorbit Cost Avoidance",desc:"Operators skip end-of-life deorbiting to save cost",ex:"847 satellites past EOL (2025)",fail:"Voluntary guidelines, no enforcement",bgc:["ASI","NDM"]}},
+  Biotech:{roles:["FDA Inspector","Clinical Trial Sponsor","Ethics Committee","Gene Therapy Developer","Independent Monitor"],standards:["ICH GCP E6(R3)","WHO Gene Therapy Guidelines","FDA 21 CFR Part 312"],countries:["Generic Jurisdiction","US (FDA)","EU (EMA)","China (NMPA)"],actors:[{n:"FDA_CBER",r:"Regulator",p:[0,0,2.5],au:0.82,re:0.70,in:0.80,ex:0.75,ce:0.85},{n:"IRB_Ethics",r:"Certifier",p:[-2,1.5,1],au:0.75,re:0.55,in:0.70,ex:0.60,ce:0.50},{n:"Trial_Sponsor",r:"Developer",p:[2,1.5,1],au:0.60,re:0.75,in:0.40,ex:0.80,ce:0.60},{n:"CRO_Monitor",r:"Auditor",p:[-1.5,-1.5,0],au:0.68,re:0.60,in:0.65,ex:0.70,ce:0.40},{n:"Gene_Therapy_Lab",r:"Developer",p:[1.5,-1.5,0],au:0.65,re:0.80,in:0.45,ex:0.85,ce:0.55},{n:"Publication_System",r:"Observer",p:[0,0,-2.5],au:0.50,re:0.40,in:0.60,ex:0.55,ce:0.65}],pw:{title:"Results Non-Reporting",desc:"Negative trial results withheld from publication",ex:"40% gene therapy trials unreported (2024)",fail:"No regulatory penalty for non-reporting",bgc:["ASI","IIC"]}},
+  Renewable:{roles:["Gold Standard Auditor","Project Developer","Carbon Registry","Independent Verifier","Offset Buyer"],standards:["ISO 14064","Gold Standard","Verra VCS","CDM"],countries:["Generic Project","Brazil (Forest)","India (Renewable)","Questionable Projects"],actors:[{n:"Gold_Standard",r:"Regulator",p:[0,0,2.5],au:0.78,re:0.65,in:0.75,ex:0.70,ce:0.80},{n:"Verra_Registry",r:"Certifier",p:[-2,1.5,1],au:0.72,re:0.60,in:0.70,ex:0.68,ce:0.55},{n:"Project_Developer",r:"Developer",p:[2,1.5,1],au:0.60,re:0.70,in:0.40,ex:0.75,ce:0.50},{n:"Independent_Verifier",r:"Auditor",p:[-1.5,-1.5,0],au:0.70,re:0.58,in:0.72,ex:0.65,ce:0.42},{n:"Carbon_Buyer",r:"Observer",p:[1.5,-1.5,0],au:0.65,re:0.45,in:0.60,ex:0.50,ce:0.38},{n:"Fraudulent_Project",r:"RedTeam",p:[0,0,-2.5],au:0.45,re:0.75,in:0.25,ex:0.70,ce:0.65}],pw:{title:"Phantom Offsets",desc:"Credits claimed without actual emission reductions",ex:"127 suspicious projects flagged (2025)",fail:"Self-reported data, limited verification",bgc:["SAD","ASI"]}},
+  Quantum:{roles:["Export Control Officer","Quantum Developer","National Security Advisor","Tech Auditor","Research Institution"],standards:["Wassenaar Arrangement","ITAR Quantum Controls","EAR Quantum Technologies"],countries:["Generic State","US (Export Controls)","China (Strategic)","EU (Emerging)"],actors:[{n:"Export_Control_Auth",r:"Regulator",p:[0,0,2.5],au:0.80,re:0.68,in:0.75,ex:0.72,ce:0.82},{n:"Quantum_Lab",r:"Developer",p:[-2,1.5,1],au:0.65,re:0.80,in:0.45,ex:0.88,ce:0.60},{n:"National_Security",r:"Observer",p:[2,1.5,1],au:0.75,re:0.70,in:0.80,ex:0.68,ce:0.70},{n:"Tech_Auditor",r:"Auditor",p:[-1.5,-1.5,0],au:0.68,re:0.62,in:0.70,ex:0.75,ce:0.45},{n:"Research_Institution",r:"Developer",p:[1.5,-1.5,0],au:0.70,re:0.75,in:0.50,ex:0.82,ce:0.55},{n:"Adversarial_Acquisition",r:"RedTeam",p:[0,0,-2.5],au:0.50,re:0.85,in:0.30,ex:0.80,ce:0.75}],pw:{title:"Dual-Use Export",desc:"Quantum tech exported as civilian, repurposed militarily",ex:"Quantum sensors repurposed for submarine detection",fail:"End-use verification impossible post-export",bgc:["STI","SRA"]}}
+};
+
+const BGC_INFO={STI:{name:"Strategic Technical Intelligence",desc:"Verification robustness",affects:"V_t coverage",w:0.18},SAD:{name:"Situational Awareness & Detection",desc:"Detection capability",affects:"V_t confidence",w:0.15},ESI:{name:"Epistemic-Strategic Integration",desc:"Adaptive learning",affects:"State transitions",w:0.14},NDM:{name:"Normative Decision Making",desc:"Institutional alignment",affects:"P_t coverage",w:0.12},SRA:{name:"Strategic Risk Assessment",desc:"Risk anticipation",affects:"R_t trust",w:0.13},IIC:{name:"Inter-Institutional Coordination",desc:"Information sharing",affects:"A_t access",w:0.16},ASI:{name:"Adaptive Strategic Implementation",desc:"Enforcement effectiveness",affects:"R_t legitimacy",w:0.12}};
+const ROLE_COLORS={Regulator:'#1E90FF',Inspector:'#FF8C00',Certifier:'#32CD32',Developer:'#DC143C',Operator:'#9370DB',Auditor:'#D2691E',RedTeam:'#FF1493',Observer:'#B0C4DE'};
+const CONV_ACTORS=[{id:'Iran',comp:0.28,pos:[0.30,0.70,0.35]},{id:'Syria',comp:0.22,pos:[0.25,0.65,0.30]},{id:'DPRK',comp:0.15,pos:[0.20,0.75,0.25]},{id:'Libya',comp:0.35,pos:[0.35,0.60,0.40]},{id:'Egypt',comp:0.48,pos:[0.55,0.50,0.45]},{id:'Algeria',comp:0.52,pos:[0.50,0.55,0.50]},{id:'Saudi Arabia',comp:0.55,pos:[0.60,0.45,0.55]},{id:'Turkey',comp:0.58,pos:[0.58,0.48,0.52]},{id:'Brazil',comp:0.68,pos:[0.65,0.40,0.60]},{id:'Argentina',comp:0.70,pos:[0.68,0.38,0.62]},{id:'S.Africa',comp:0.72,pos:[0.70,0.36,0.65]},{id:'India',comp:0.65,pos:[0.62,0.42,0.58]},{id:'Pakistan',comp:0.60,pos:[0.58,0.46,0.54]},{id:'Japan',comp:0.88,pos:[0.88,0.18,0.82]},{id:'S.Korea',comp:0.85,pos:[0.85,0.20,0.80]},{id:'Germany',comp:0.90,pos:[0.90,0.15,0.85]},{id:'Canada',comp:0.87,pos:[0.87,0.17,0.82]},{id:'Sweden',comp:0.94,pos:[0.94,0.10,0.90]},{id:'Switzerland',comp:0.93,pos:[0.93,0.11,0.88]},{id:'Australia',comp:0.91,pos:[0.91,0.13,0.86]}];
+const ACTIONS=[{icon:'🔍',title:'Snap Inspection',desc:'Unannounced inspector visit',eff:'+STI +SAD −IIC',type:'pos',imp:{STI:0.08,SAD:0.06,IIC:-0.04}},{icon:'📋',title:'Additional Protocol',desc:'State adopts INFCIRC/540',eff:'+STI +NDM +ASI',type:'pos',imp:{STI:0.10,NDM:0.08,ASI:0.06}},{icon:'⚡',title:'Evasion Detected',desc:'Undeclared facility found',eff:'−SAD −IIC ↓Trust',type:'neg',imp:{SAD:-0.15,IIC:-0.12,SRA:-0.10}},{icon:'🤝',title:'Bilateral MRA',desc:'Mutual recognition agreement signed',eff:'+NDM +ASI +IIC',type:'pos',imp:{NDM:0.12,ASI:0.08,IIC:0.06}},{icon:'💥',title:'Certification Crisis',desc:'Major certifier compromise',eff:'−IIC −ASI ↓Legit',type:'neg',imp:{IIC:-0.18,ASI:-0.12,STI:-0.05}},{icon:'📡',title:'Remote Monitoring',desc:'New continuous monitoring deployed',eff:'+STI +SAD +ESI',type:'pos',imp:{STI:0.09,SAD:0.07,ESI:0.08}},{icon:'⚖️',title:'Sanctions Imposed',desc:'Non-compliant state consequences',eff:'+SRA ±NDM',type:'mix',imp:{SRA:0.08,NDM:-0.05,IIC:-0.06}},{icon:'🔧',title:'Inspector Surge',desc:'Emergency inspector deployment',eff:'+STI +IIC +SAD',type:'pos',imp:{STI:0.06,IIC:0.10,SAD:0.05}}];
+
+let domain='Nuclear',bgcVals={STI:0.75,SAD:0.70,ESI:0.68,NDM:0.72,SRA:0.69,IIC:0.80,ASI:0.65},indVals={};
+let gnnScene,gnnCam,gnnRend,gnnAF,gnnAngle=0,gnnRotDir=1;
+let convScene,convCam,convRend,convAF,convPlaying=false,convTarget=1.0,convMonth=0,convMeshes=[];
+
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const gc=s=>s>=0.75?'var(--green)':s>=0.55?'var(--amber)':'var(--red)';
+const gst=s=>s>=0.75?'✅':s>=0.55?'⚠️':'❌';
+const g$=id=>document.getElementById(id);
+const setT=(id,v)=>{const e=g$(id);if(e)e.textContent=v;};
+const setH=(id,v)=>{const e=g$(id);if(e)e.innerHTML=v;};
+const setSt=(id,p,v)=>{const e=g$(id);if(e)e.style[p]=v;};
+
+function scoreChain(d){
+  const nofs=REG.domains[d].NOFs,nofSc={};
+  nofs.forEach(n=>{const vals=n.inds.map(i=>clamp(indVals[i]!==undefined?indVals[i]:0.55,0,1));nofSc[n.id]={score:vals.reduce((a,v)=>a+v,0)/vals.length,nof:n};});
+  const bacSc={};
+  Object.entries(REG.BAC).forEach(([bid,b])=>{
+    const mapped=nofs.filter(n=>n.bac===bid);
+    if(!mapped.length){bacSc[bid]={score:0,bac:b};return;}
+    const pairs=mapped.map(n=>({v:nofSc[n.id].score,w:n.w})),denom=pairs.reduce((a,p)=>a+p.w,0);
+    bacSc[bid]={score:denom>0?pairs.reduce((a,p)=>a+p.v*p.w,0)/denom:0,bac:b};
+  });
+  const terms=Object.entries(REG.BAC).map(([id,b])=>({v:bacSc[id].score,w:b.w})),denom=terms.reduce((a,t)=>a+t.w,0);
+  return{nofSc,bacSc,gGACn:denom>0?terms.reduce((a,t)=>a+t.v*t.w,0)/denom:0};
+}
+function computeGWC(){return Object.entries(BGC_INFO).reduce((a,[k,v])=>a+bgcVals[k]*v.w,0);}
+
+function setDomain(d,btn){
+  domain=d;document.querySelectorAll('.dbn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');
+  indVals={};const st=STARTERS[d]||{};REG.domains[d].NOFs.forEach(n=>n.inds.forEach(i=>{indVals[i]=st[i]!==undefined?st[i]:0.55;}));
+  populateSelects();buildIndSliders();buildBGCGrid();buildPathways();buildActions();buildActorTable();updateAll();
+  if(g$('pnl-gnn')&&g$('pnl-gnn').classList.contains('on'))rebuildGNN();
+  setT('reg-dom',d.toUpperCase());setT('gnn-dom',d.toUpperCase());
+  setT('gnn-ac',DCFG[d].actors.length+' actors');setT('gwc-dom-lbl',d+' · BGC → g-GWC');
+}
+
+function populateSelects(){
+  const cfg=DCFG[domain];
+  [['role-sel',cfg.roles],['std-sel',cfg.standards],['ctry-sel',cfg.countries]].forEach(([id,opts])=>{
+    const s=g$(id);if(!s)return;s.innerHTML=opts.map(o=>`<option>${o}</option>`).join('');
+  });updateGS();
+}
+
+function updateGS(){
+  const role=g$('role-sel')?g$('role-sel').value:'',std=g$('std-sel')?g$('std-sel').value:'',ctry=g$('ctry-sel')?g$('ctry-sel').value:'';
+  setT('role-inf','Playing as: '+role);setT('std-inf','Testing: '+std);setT('ctry-inf','Context: '+ctry);
+  const b=bgcVals,vc=(b.STI*0.80).toFixed(2),vk=(b.SAD*0.85).toFixed(2),pc=(b.NDM*0.80).toFixed(2),rt=(b.SRA*0.85).toFixed(2),aa=(1-b.IIC*0.70).toFixed(2),rl=(b.ASI*0.90).toFixed(2);
+  const cf=0.85,ca=parseFloat(vc)*0.82,gap=Math.abs(cf-ca);
+  setT('gs-ps',(b.STI*0.94).toFixed(2));setT('gs-pc',pc);setT('gs-ac',(b.IIC*0.75).toFixed(2));setT('gs-ai',(b.SRA*0.80).toFixed(2));setT('gs-aa',aa);
+  setT('gs-cf',cf.toFixed(2));setT('gs-ca',ca.toFixed(2));
+  const cge=g$('gs-cg');if(cge){cge.textContent=gap.toFixed(2)+(gap>0.15?' ⚠':' ✓');cge.style.color=gap>0.15?'var(--red)':'var(--green)';}
+  setT('gs-vc',vc);setT('gs-vk',vk);setT('gs-vi',(b.STI*0.70).toFixed(2));setT('gs-rt',rt);setT('gs-rd',(1-b.SAD*0.8).toFixed(2));setT('gs-rl',rl);
+  setT('state-formula',`V_t.coverage    = BGC[STI] × 0.80 = ${vc}\nV_t.confidence  = BGC[SAD] × 0.85 = ${vk}\nP_t.coverage    = BGC[NDM] × 0.80 = ${pc}\nR_t.trust       = BGC[SRA] × 0.85 = ${rt}\nA_t.access      = 1 − BGC[IIC] × 0.70 = ${aa}\nR_t.legitimacy  = BGC[ASI] × 0.90 = ${rl}`);
+}
+
+function buildIndSliders(){
+  const el=g$('ind-sliders');if(!el)return;
+  const nofs=REG.domains[domain].NOFs;let h='';
+  nofs.forEach(n=>{
+    h+=`<div class="ind-sec-hd">${n.id} · ${n.name}</div>`;
+    n.inds.forEach(ind=>{
+      const v=indVals[ind]||0.55,pct=Math.round(v*100);
+      h+=`<div class="ind-row"><div class="ind-nm" title="${ind}">${ind.replace(/_/g,' ')}</div><input type="range" class="ind-sl" min="0" max="100" value="${pct}" style="--pct:${pct}%" oninput="updInd('${ind}',this.value,this)"><div class="ind-vl" id="iv-${ind}">${v.toFixed(2)}</div></div>`;
+    });
+  });
+  el.innerHTML=h;
+}
+function updInd(ind,val,inp){indVals[ind]=parseInt(val)/100;inp.style.setProperty('--pct',val+'%');setT('iv-'+ind,(parseInt(val)/100).toFixed(2));updateRegistry();}
+
+function updateRegistry(){
+  const {nofSc,bacSc,gGACn}=scoreChain(domain);
+  const nl=g$('nof-list');if(nl){nl.innerHTML=Object.entries(nofSc).map(([id,d])=>`<div class="nof-it"><div><div class="nof-id">${id}</div><div class="nof-nm">${d.nof.name.slice(0,20)}</div></div><div style="flex:1"><div class="nof-br"><div class="nof-bf" style="width:${d.score*100}%;background:${gc(d.score)}"></div></div></div><div class="nof-vl" style="color:${gc(d.score)}">${d.score.toFixed(2)}</div><div class="nof-ps">${gst(d.score)}</div></div>`).join('');}
+  const bl=g$('bac-list');if(bl){bl.innerHTML=Object.entries(bacSc).map(([id,d])=>`<div class="bac-it"><div style="min-width:68px"><div class="bac-id">${id}</div><div class="bac-nm">${d.bac.name.slice(0,15)}</div></div><div class="bac-br"><div class="bac-bf" style="width:${d.score*100}%;background:${gc(d.score)}"></div></div><div class="bac-vl" style="color:${gc(d.score)}">${d.score.toFixed(2)}</div></div>`).join('');}
+  setT('gg-val',gGACn.toFixed(3));setSt('gg-val','color',gc(gGACn));
+  const gb=g$('gg-bar');if(gb){gb.style.width=(gGACn*100)+'%';gb.style.background=gc(gGACn);}
+  const chip=g$('gg-chip');if(chip){chip.textContent=gGACn>=REG.gGACn_theta?'PASS ✓':'Below θ';chip.className='chip '+(gGACn>=REG.gGACn_theta?'chip-g':'chip-w');}
+}
+
+function buildBGCGrid(){
+  const el=g$('bgc-grid');if(!el)return;
+  el.innerHTML=Object.entries(BGC_INFO).map(([k,v])=>`<div class="bgcc"><div class="bgc-code">${k}</div><div class="bgc-name">${v.name}</div><div class="bgc-score" id="bgcs-${k}" style="color:${gc(bgcVals[k])}">${bgcVals[k].toFixed(2)}</div><div class="bgc-bh"><div class="bgc-bf" id="bgcb-${k}" style="width:${bgcVals[k]*100}%;background:${gc(bgcVals[k])}"></div></div><input class="bgc-sl" type="range" min="0" max="100" value="${Math.round(bgcVals[k]*100)}" style="--pct:${Math.round(bgcVals[k]*100)}%" id="bgcsl-${k}" oninput="updBGC('${k}',this.value,this)"></div>`).join('');
+  const desc=g$('bgc-desc');if(desc){desc.innerHTML=Object.entries(BGC_INFO).map(([k,v])=>`<div style="display:grid;grid-template-columns:52px 170px 1fr 110px;gap:10px;padding:5px 0;border-bottom:1px solid var(--bg-warm);font-size:11px"><span style="font-family:'DM Mono',monospace;font-size:10px;color:var(--teal)">${k}</span><span style="font-weight:600">${v.name}</span><span style="color:var(--ink-light)">${v.desc}</span><span style="color:var(--ink-muted)">${v.affects}</span></div>`).join('');}
+}
+function updBGC(k,val,inp){bgcVals[k]=parseInt(val)/100;inp.style.setProperty('--pct',val+'%');setT('bgcs-'+k,bgcVals[k].toFixed(2));setSt('bgcs-'+k,'color',gc(bgcVals[k]));const bar=g$('bgcb-'+k);if(bar){bar.style.width=val+'%';bar.style.background=gc(bgcVals[k]);}updateAll();}
+
+function updateAll(){
+  const gwc=computeGWC();setT('gwc-val',gwc.toFixed(3));setSt('gwc-val','color',gc(gwc));
+  const gb=g$('gwc-bar');if(gb){gb.style.width=(gwc*100)+'%';gb.style.background=gc(gwc);}
+  const chip=g$('gwc-chip');if(chip){chip.textContent=gwc>=0.80?'On Target':gwc>=0.65?'Below Target':'Critical';chip.className='chip '+(gwc>=0.80?'chip-g':gwc>=0.65?'chip-w':'chip-r');}
+  const delta=gwc-0.80;setT('gwc-delta',`Δ = ${delta>=0?'+':''}${delta.toFixed(3)} ${delta>=0?'above':'to'} θ=0.80`);
+  updateGS();updateRegistry();
+}
+
+function buildPathways(){
+  const el=g$('pw-grid');if(!el)return;
+  el.innerHTML=Object.entries(DCFG).map(([d,cfg])=>`<div class="pwc"><div class="pw-dom">${d.toUpperCase()}</div><div class="pw-title">${cfg.pw.title}</div><div class="pw-desc">${cfg.pw.desc}</div><div class="pw-ex">${cfg.pw.ex}</div><div class="pw-fail">⚠ ${cfg.pw.fail}</div><div class="pw-bgc">${cfg.pw.bgc.map(b=>`<span class="pw-btag">${b}</span>`).join('')}</div></div>`).join('');
+}
+
+function buildActions(){
+  const el=g$('ac-grid');if(!el)return;
+  el.innerHTML=ACTIONS.map((a,i)=>`<div class="acc" onclick="applyAction(${i})"><div class="acc-icon">${a.icon}</div><div class="acc-title">${a.title}</div><div class="acc-desc">${a.desc}</div><div class="acc-eff ${a.type==='pos'?'ae-p':a.type==='neg'?'ae-n':'ae-m'}">${a.eff}</div></div>`).join('');
+}
+function applyAction(i){
+  const a=ACTIONS[i],before=computeGWC();
+  for(const[k,d] of Object.entries(a.imp))bgcVals[k]=clamp(bgcVals[k]+d,0,1);
+  for(const k of Object.keys(BGC_INFO)){const sl=g$('bgcsl-'+k);if(sl){sl.value=Math.round(bgcVals[k]*100);sl.style.setProperty('--pct',sl.value+'%');}}
+  updateAll();const after=computeGWC(),delta=after-before;
+  setH('ac-out',`<span style="color:var(--purple-mid);font-weight:600">Applied: ${a.icon} ${a.title}</span>\n\nBGC Changes:\n${Object.entries(a.imp).map(([k,d])=>`  ${k}: ${d>=0?'+':''}${d.toFixed(2)}  → ${bgcVals[k].toFixed(2)}`).join('\n')}\n\ng-GWC: <span style="color:var(--amber)">${before.toFixed(3)}</span> → <span style="color:${gc(after)}">${after.toFixed(3)}</span>  Δ=<span style="color:${delta>=0?'var(--green)':'var(--red)'}">${delta>=0?'+':''}${delta.toFixed(3)}</span>`);
+}
+
+function buildActorTable(){
+  const el=g$('actor-tbl');if(!el)return;
+  const actors=DCFG[domain].actors;
+  const bar=(v,c)=>`<div style="display:inline-block;width:${Math.round(v*55)}px;height:3px;background:${c};vertical-align:middle;margin-left:4px;opacity:0.7"></div>`;
+  el.innerHTML=`<thead><tr><th>Actor</th><th>Role</th><th>Authority</th><th>Resources</th><th>Independence</th><th>Expertise</th><th>Centrality</th></tr></thead><tbody>${actors.map(a=>{const col=ROLE_COLORS[a.r]||'#999';return`<tr><td><span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${col};margin-right:6px;vertical-align:middle"></span>${a.n.replace(/_/g,' ')}</td><td style="font-family:'DM Mono',monospace;font-size:9px;color:${col}">${a.r}</td><td style="font-family:'DM Mono',monospace;font-size:10px">${a.au.toFixed(2)}${bar(a.au,'#1E90FF')}</td><td style="font-family:'DM Mono',monospace;font-size:10px">${a.re.toFixed(2)}${bar(a.re,'#32CD32')}</td><td style="font-family:'DM Mono',monospace;font-size:10px">${a.in.toFixed(2)}${bar(a.in,'#FF8C00')}</td><td style="font-family:'DM Mono',monospace;font-size:10px">${a.ex.toFixed(2)}${bar(a.ex,'#9370DB')}</td><td style="font-family:'DM Mono',monospace;font-size:10px">${a.ce.toFixed(2)}${bar(a.ce,'#D2691E')}</td></tr>`;}).join('')}</tbody>`;
+}
+
+function rebuildGNN(){
+  const cvs=g$('gnn-cvs');if(!cvs||typeof THREE==='undefined')return;
+  if(gnnRend)gnnRend.dispose();if(gnnAF)cancelAnimationFrame(gnnAF);
+  const W=cvs.parentElement.clientWidth||800,H=500;
+  gnnScene=new THREE.Scene();gnnScene.background=new THREE.Color(0x000000);
+  gnnCam=new THREE.PerspectiveCamera(60,W/H,0.1,100);gnnCam.position.set(6,4,6);gnnCam.lookAt(0,0,0);
+  gnnRend=new THREE.WebGLRenderer({canvas:cvs,antialias:true});gnnRend.setSize(W,H);gnnRend.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  const actors=DCFG[domain].actors,meshes=[];
+  actors.forEach(a=>{
+    const col=new THREE.Color(ROLE_COLORS[a.r]||'#ffffff');
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(0.22,16,16),new THREE.MeshPhongMaterial({color:col,emissive:col,emissiveIntensity:0.35,shininess:60}));
+    mesh.position.set(a.p[0],a.p[2],a.p[1]);gnnScene.add(mesh);meshes.push({mesh,a});
+  });
+  for(let i=0;i<meshes.length-1;i++){
+    const pa=meshes[i].mesh.position.clone(),pb=meshes[i+1].mesh.position.clone();
+    gnnScene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([pa,pb]),new THREE.LineBasicMaterial({color:0x3355aa,opacity:0.45,transparent:true})));
+    if(i+2<meshes.length)gnnScene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints([pa,meshes[i+2].mesh.position.clone()]),new THREE.LineBasicMaterial({color:0x223366,opacity:0.22,transparent:true})));
+  }
+  gnnScene.add(new THREE.AmbientLight(0xffffff,0.3));
+  const dl=new THREE.DirectionalLight(0xffffff,0.8);dl.position.set(5,10,5);gnnScene.add(dl);
+  const pl=new THREE.PointLight(0x4488ff,1,20);pl.position.set(0,5,0);gnnScene.add(pl);
+  const leg=g$('gnn-leg');if(leg){const roles=[...new Set(actors.map(a=>a.r))];leg.innerHTML=roles.map(r=>`<div class="gnn-li"><div class="gnn-dot" style="background:${ROLE_COLORS[r]||'#fff'}"></div>${r}</div>`).join('');}
+  buildActorTable();gnnAngle=0;
+  (function anim(){gnnAF=requestAnimationFrame(anim);gnnAngle+=0.004*gnnRotDir;gnnCam.position.set(Math.sin(gnnAngle)*7,4,Math.cos(gnnAngle)*7);gnnCam.lookAt(0,0,0);meshes.forEach((m,i)=>{const s=1+0.06*Math.sin(Date.now()*0.002+i*1.1);m.mesh.scale.setScalar(s);});gnnRend.render(gnnScene,gnnCam);})();
+}
+function resetGNN(){gnnAngle=0;}
+
+function initConv(){
+  const cvs=g$('conv-cvs');if(!cvs||typeof THREE==='undefined')return;
+  if(convRend)convRend.dispose();if(convAF)cancelAnimationFrame(convAF);
+  const W=cvs.parentElement.clientWidth||800,H=460;
+  convScene=new THREE.Scene();convScene.background=new THREE.Color(0x070b1a);
+  convCam=new THREE.PerspectiveCamera(60,W/H,0.1,100);convCam.position.set(1.5,1.2,2.2);convCam.lookAt(0.5,0.5,0.5);
+  convRend=new THREE.WebGLRenderer({canvas:cvs,antialias:true});convRend.setSize(W,H);convRend.setPixelRatio(Math.min(window.devicePixelRatio,2));
+  [[1,0,0,0xff4444],[0,1,0,0x44ff44],[0,0,1,0x4444ff]].forEach(([x,y,z,c])=>convScene.add(new THREE.ArrowHelper(new THREE.Vector3(x,y,z),new THREE.Vector3(0,0,0),1.1,c,0.05,0.04)));
+  const gpts=[];for(let i=0;i<=10;i++){const t=i/10;gpts.push(t,0,0,t,0,1,0,0,t,1,0,t);}
+  const gg=new THREE.BufferGeometry();gg.setAttribute('position',new THREE.Float32BufferAttribute(gpts,3));convScene.add(new THREE.LineSegments(gg,new THREE.LineBasicMaterial({color:0x1a2044,opacity:0.5,transparent:true})));
+  convMeshes=[];
+  CONV_ACTORS.forEach(a=>{
+    const tier=a.comp<0.40?'#e63946':a.comp<0.60?'#f4a261':a.comp<0.75?'#e9c46a':'#52b788';
+    const sz=0.03+(1-a.comp)*0.07;
+    const mesh=new THREE.Mesh(new THREE.SphereGeometry(sz,12,12),new THREE.MeshPhongMaterial({color:new THREE.Color(tier),emissive:new THREE.Color(tier),emissiveIntensity:0.4}));
+    mesh.position.set(a.pos[0],a.pos[2],a.pos[1]);convScene.add(mesh);convMeshes.push({mesh,actor:a,comp:a.comp});
+  });
+  convScene.add(new THREE.AmbientLight(0xffffff,0.2));const pl=new THREE.PointLight(0x4488ff,1.2,5);pl.position.set(0.5,1.5,0.5);convScene.add(pl);
+  const leg=g$('conv-legend');if(leg){leg.innerHTML=CONV_ACTORS.map(a=>{const c=a.comp<0.40?'#e63946':a.comp<0.60?'#f4a261':a.comp<0.75?'#e9c46a':'#52b788';return`<span style="color:${c}">● ${a.id} ${Math.round(a.comp*100)}%</span>`;}).join('');}
+  updateConvStats();let convAngle=0;
+  (function anim(){
+    convAF=requestAnimationFrame(anim);convAngle+=0.003;
+    convCam.position.set(0.5+1.2*Math.sin(convAngle),0.8+0.3*Math.sin(convAngle*0.4),0.5+1.2*Math.cos(convAngle));convCam.lookAt(0.5,0.3,0.5);
+    if(convPlaying){
+      const spd=parseInt(g$('conv-spd')?g$('conv-spd').value:5);convMonth=Math.min(convMonth+0.02*spd,24);const t=convMonth/24;
+      convMeshes.forEach(m=>{
+        const tComp=m.actor.comp+(convTarget-m.actor.comp)*Math.min(t*1.2,1);m.comp=clamp(tComp,0,1);
+        const ap=m.actor.pos,tx=ap[0]+(convTarget-ap[0])*Math.min(t*0.8,1),tz=ap[1]+(convTarget-ap[1])*Math.min(t*0.8,1);
+        m.mesh.position.set(tx,ap[2]+(convTarget-ap[2])*Math.min(t*0.5,1),tz);
+        const tier=m.comp<0.40?'#e63946':m.comp<0.60?'#f4a261':m.comp<0.75?'#e9c46a':'#52b788';
+        m.mesh.material.color.set(tier);m.mesh.material.emissive.set(tier);
+        m.mesh.scale.setScalar(1+0.06*Math.sin(Date.now()*0.003+CONV_ACTORS.indexOf(m.actor)));
+      });
+      setT('conv-mo',Math.round(convMonth)+' mo');updateConvStats();
+      if(convMonth>=24){convPlaying=false;setT('conv-play-btn','▶ Animate');}
+    }
+    convRend.render(convScene,convCam);
+  })();
+}
+function updateConvStats(){const comps=convMeshes.length?convMeshes.map(m=>m.comp):CONV_ACTORS.map(a=>a.comp);const avg=comps.reduce((a,v)=>a+v,0)/comps.length;setT('conv-avg',Math.round(avg*100)+'%');setT('conv-crit',comps.filter(c=>c<0.40).length);}
+function toggleConv(){convPlaying=!convPlaying;setT('conv-play-btn',convPlaying?'⏸ Pause':'▶ Animate');}
+function resetConv(){
+  convPlaying=false;convMonth=0;setT('conv-play-btn','▶ Animate');setT('conv-mo','0');
+  convMeshes.forEach(m=>{const a=m.actor;m.comp=a.comp;m.mesh.position.set(a.pos[0],a.pos[2],a.pos[1]);const tier=a.comp<0.40?'#e63946':a.comp<0.60?'#f4a261':a.comp<0.75?'#e9c46a':'#52b788';m.mesh.material.color.set(tier);m.mesh.material.emissive.set(tier);m.mesh.scale.setScalar(1);});
+  updateConvStats();
+}
+
+function swTab(id,btn){
+  document.querySelectorAll('.p3t').forEach(b=>b.classList.remove('on'));document.querySelectorAll('.p3pnl').forEach(p=>p.classList.remove('on'));
+  btn.classList.add('on');const pnl=g$('pnl-'+id);if(pnl)pnl.classList.add('on');
+  if(id==='gnn')setTimeout(rebuildGNN,60);if(id==='convergence')setTimeout(initConv,60);
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  REG.domains.Nuclear.NOFs.forEach(n=>n.inds.forEach(i=>{indVals[i]=STARTERS.Nuclear[i]||0.55;}));
+  populateSelects();buildIndSliders();buildBGCGrid();buildPathways();buildActions();buildActorTable();updateAll();
+});
+window.addEventListener('resize',()=>{
+  if(gnnRend&&g$('pnl-gnn')&&g$('pnl-gnn').classList.contains('on'))rebuildGNN();
+  if(convRend&&g$('pnl-convergence')&&g$('pnl-convergence').classList.contains('on'))initConv();
+});
+</script>
+</body>
+</html>
